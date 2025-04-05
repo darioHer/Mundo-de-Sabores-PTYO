@@ -1,6 +1,8 @@
 import { ComentarioEntity } from 'src/comentarios/entity/comentario.entity';
 import { ProductoEntity } from 'src/productos/entity/producto.entity';
+import { CalificacionEntity } from 'src/recetas/entity/calificacion.entity';
 import { RecetaEntity } from 'src/recetas/entity/receta.entity';
+import { UsuarioRecetaFavoritaEntity } from 'src/recetas/favoritos/usuario_receta_favorita.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 
@@ -25,7 +27,15 @@ export class UsuarioEntity {
   productos: ProductoEntity[];
 
   @OneToMany(() => ComentarioEntity, comentario => comentario.usuario)
-comentarios: ComentarioEntity[];
+  comentarios: ComentarioEntity[];
+
+  @OneToMany(() => UsuarioRecetaFavoritaEntity, favorito => favorito.usuario)
+  favoritos: UsuarioRecetaFavoritaEntity[];
+
+  @OneToMany(() => CalificacionEntity, calificacion => calificacion.usuario)
+  calificaciones: CalificacionEntity[];
+
+
 
 
 }

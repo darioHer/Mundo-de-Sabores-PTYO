@@ -1,10 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Repository, ILike } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RecetaEntity } from './entity/receta.entity';
 import { CreateRecetaDto } from './dto/create-receta.dto';
 import { UpdateRecetaDto } from './dto/update-receta.dto';
 import { UsuarioEntity } from 'src/auth/entity/usuario.entity';
+import { UsuarioRecetaFavoritaEntity } from './favoritos/usuario_receta_favorita.entity';
+import { CalificacionEntity } from './entity/calificacion.entity';
+import { CalificarRecetaDto } from './dto/calificar-receta.dto';
 
 
 @Injectable()
@@ -14,6 +17,10 @@ export class RecetasService {
     private readonly recetaRepository: Repository<RecetaEntity>,
     @InjectRepository(UsuarioEntity)
     private readonly usuarioRepository: Repository<UsuarioEntity>,
+    @InjectRepository(UsuarioRecetaFavoritaEntity)
+    private readonly favoritoRepository: Repository<UsuarioRecetaFavoritaEntity>,
+    @InjectRepository(CalificacionEntity)
+    private readonly calificacionRepository: Repository<CalificacionEntity>,
   ) {}
 
   async create(createRecetaDto: CreateRecetaDto): Promise<RecetaEntity> {
@@ -62,4 +69,50 @@ export class RecetasService {
       relations: ['usuario'],
     });
   }
+
+  async marcarFavorito(recetaId: number, usuarioId: number): Promise<string> {
+    const receta = await this.recetaRepository.findOne({ where: { id: recetaId } });
+    const usuario = await this.usuarioRepository.findOne({ where: { id: usuarioId } });
+  
+    if (!receta || !usuario) throw new NotFoundException('Receta o Usuario no encontrado');
+  
+    const yaExiste = await this.favoritoRepository.findOne({ where: { receta, usuario } });
+    if (yaExiste) throw new BadRequestException('Ya marcaste esta receta como favorita');
+  
+    const favorito = this.favoritoRepository.create({ receta, usuario });
+    await this.favoritoRepository.save(favorito);
+    return 'Receta marcada como favorita';
+  }
+  
+  async obtenerFavoritosPorUsuario(usuarioId: number): Promise<RecetaEntity[]> {
+    const favoritos = await this.favoritoRepository.find({
+      where: { usuario: { id: usuarioId } },
+      relations: ['receta'],
+    });
+    return favoritos.map(fav => fav.receta);
+  }
+  async calificarReceta(
+    recetaId: number,
+    usuarioId: number,
+    dto: CalificarRecetaDto,
+  ): Promise<string> {
+    const receta = await this.recetaRepository.findOne({ where: { id: recetaId } });
+    const usuario = await this.usuarioRepository.findOne({ where: { id: usuarioId } });
+  
+    if (!receta || !usuario) throw new NotFoundException('Receta o Usuario no encontrado');
+  
+    const calificacionExistente = await this.calificacionRepository.findOne({ where: { receta, usuario } });
+  
+    if (calificacionExistente) {
+      calificacionExistente.puntuacion = dto.puntuacion;
+      await this.calificacionRepository.save(calificacionExistente);
+      return 'Calificación actualizada';
+    }
+  
+    const nueva = this.calificacionRepository.create({ receta, usuario, puntuacion: dto.puntuacion });
+    await this.calificacionRepository.save(nueva);
+    return 'Receta calificada';
+  }
+
+  
 }

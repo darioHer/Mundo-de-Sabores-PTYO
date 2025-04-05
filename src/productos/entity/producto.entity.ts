@@ -1,5 +1,7 @@
 import { UsuarioEntity } from 'src/auth/entity/usuario.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { CategoriaEntity } from 'src/categorias/entity/categoria.entity';
+import { ImagenEntity } from 'src/imagenes/entity/imagen.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('productos')
 export class ProductoEntity {
@@ -20,5 +22,13 @@ export class ProductoEntity {
 
   @ManyToOne(() => UsuarioEntity, usuario => usuario.productos, { eager: true })
   usuario: UsuarioEntity;
+
+  @ManyToOne(() => CategoriaEntity, categoria => categoria.productos, { eager: true })
+  categoria: CategoriaEntity;
+
+  @OneToMany(() => ImagenEntity, imagen => imagen.producto, { cascade: true })
+  imagenes: ImagenEntity[];
+
+  
 
 }

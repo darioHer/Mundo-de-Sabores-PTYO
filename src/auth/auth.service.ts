@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsuarioEntity } from './entity/usuario.entity';
 import { Repository } from 'typeorm';
@@ -68,5 +68,26 @@ export class AuthService {
   async getAllUsers(): Promise<string[]> {
     const users = await this.usuarioRepository.find();
     return users.map(user => user.username); 
+  }
+  async obtenerPerfilPublico(id: number): Promise<any> {
+    const usuario = await this.usuarioRepository.findOne({
+      where: { id },
+      relations: ['recetas', 'comentarios', 'calificaciones'],
+    });
+  
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+  
+    return {
+      nombre: usuario.username,
+      email: usuario.email,
+      recetas: usuario.recetas,
+      comentarios: usuario.comentarios,
+      calificaciones: usuario.calificaciones.map(c => ({
+        recetaId: c.receta.id,
+        puntuacion: c.puntuacion,
+      })),
+    };
   }
 }

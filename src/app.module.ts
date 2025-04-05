@@ -8,6 +8,10 @@ import { AuthModule } from './auth/auth.module';
 import { RecetasModule } from './recetas/recetas.module';
 import { ComentariosModule } from './comentarios/comentarios.module';
 import { ProductosModule } from './productos/productos.module';
+import { CategoriasModule } from './categorias/categorias.module';
+import { ImagenesController } from './imagenes/imagenes.controller';
+import { ImagenesService } from './imagenes/imagenes.service';
+import { ImagenesModule } from './imagenes/imagenes.module';
 
 @Module({
   imports: [
@@ -26,8 +30,8 @@ import { ProductosModule } from './productos/productos.module';
       password: configService.get(DB_PASSWORD),
       database: configService.get(DB_DATABASE),
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
-      logging: true,
+      synchronize: false,
+      logging: false,
       migrationsRun: false,
     }),
     inject: [ConfigService],
@@ -40,12 +44,16 @@ import { ProductosModule } from './productos/productos.module';
   ComentariosModule,
   
   ProductosModule,
+  
+  CategoriasModule,
+  
+  ImagenesModule,
 
   
 
 
   ],
-  controllers: [AppController, ],
-  providers: [AppService, ConfigService,],
+  controllers: [AppController, ImagenesController, ],
+  providers: [AppService, ConfigService, ImagenesService,],
 })
 export class AppModule {}

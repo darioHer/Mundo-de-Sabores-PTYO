@@ -1,5 +1,9 @@
 import { UsuarioEntity } from 'src/auth/entity/usuario.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
+import { UsuarioRecetaFavoritaEntity } from '../favoritos/usuario_receta_favorita.entity';
+import { CalificacionEntity } from './calificacion.entity';
+import { CategoriaEntity } from 'src/categorias/entity/categoria.entity';
+import { ImagenEntity } from 'src/imagenes/entity/imagen.entity';
 
 @Entity('recetas')
 export class RecetaEntity {
@@ -23,6 +27,21 @@ export class RecetaEntity {
 
   @ManyToOne(() => UsuarioEntity, usuario => usuario.recetas, { eager: true })
   usuario: UsuarioEntity;
+
+  @OneToMany(() => UsuarioRecetaFavoritaEntity, favorito => favorito.receta)
+  favoritos: UsuarioRecetaFavoritaEntity[];
+
+  @OneToMany(() => CalificacionEntity, calificacion => calificacion.receta)
+  calificaciones: CalificacionEntity[];
+
+  @ManyToOne(() => CategoriaEntity, categoria => categoria.recetas, { eager: true })
+  categoria: CategoriaEntity;
+
+  @OneToMany(() => ImagenEntity, imagen => imagen.receta, { cascade: true })
+  imagenes: ImagenEntity[];
+
+
+
   
 
 }

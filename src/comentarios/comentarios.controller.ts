@@ -26,4 +26,6 @@ export class ComentariosController {
   async remove(@Param('id') id: number) {
     return await this.comentariosService.remove(id);
   }
+
+  
 }

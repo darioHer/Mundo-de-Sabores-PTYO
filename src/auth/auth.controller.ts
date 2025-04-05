@@ -27,4 +27,8 @@ export class AuthController {
   async getAllUsers() {
     return await this.authService.getAllUsers();
   }
+  @Get(':id/perfil-publico')
+async perfilPublico(@Param('id') id: number) {
+  return this.authService.obtenerPerfilPublico(id);
+}
 }
