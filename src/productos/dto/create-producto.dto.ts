@@ -1,15 +1,20 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CreateProductoDto {
   @IsNotEmpty()
-  name: string; // Nombre del producto
+  name: string; 
 
   @IsNotEmpty()
-  description: string; // Descripción del producto
+  description: string; 
 
   @IsNotEmpty()
-  price: number; // Precio del producto
+  price: number; 
 
   @IsNotEmpty()
-  region: string; // Región de Colombia donde se vende el producto
+  region: string; 
+
+  @IsNotEmpty()
+  @IsNumber()
+  usuarioId: number;
+
 }

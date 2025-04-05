@@ -1,9 +1,12 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CreateComentarioDto {
   @IsNotEmpty()
-  recetaId: number; // ID de la receta a la que pertenece el comentario
+  recetaId: number; 
 
   @IsNotEmpty()
-  content: string; // Contenido del comentario
+  contenido: string; 
+
+  @IsNumber()
+  usuarioId: number;
 }

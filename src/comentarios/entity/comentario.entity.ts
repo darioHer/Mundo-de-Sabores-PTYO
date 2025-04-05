@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { UsuarioEntity } from 'src/auth/entity/usuario.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 
 @Entity('comentarios')
 export class ComentarioEntity {
@@ -6,8 +7,11 @@ export class ComentarioEntity {
   id: number;
 
   @Column()
-  recetaId: number; // ID de la receta a la que pertenece el comentario
+  recetaId: number; 
 
   @Column()
-  content: string; // Contenido del comentario
+  contenido: string; 
+
+  @ManyToOne(() => UsuarioEntity, usuario => usuario.comentarios, { eager: true, onDelete: 'CASCADE' })
+  usuario: UsuarioEntity;
 }

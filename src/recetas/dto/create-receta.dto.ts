@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CreateRecetaDto {
   @IsNotEmpty()
@@ -14,5 +14,9 @@ export class CreateRecetaDto {
   instructions: string;
 
   @IsNotEmpty()
-  region: string; // Región de Colombia
+  @IsNumber()
+  usuarioId: number;
+
+  @IsNotEmpty()
+  region: string; 
 }

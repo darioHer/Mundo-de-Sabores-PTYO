@@ -15,7 +15,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  // Método para validar la contraseña
+  // validar la contraseña
   private validatePassword(password: string): void {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!passwordRegex.test(password)) {

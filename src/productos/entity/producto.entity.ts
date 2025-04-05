@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { UsuarioEntity } from 'src/auth/entity/usuario.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 
 @Entity('productos')
 export class ProductoEntity {
@@ -16,4 +17,8 @@ export class ProductoEntity {
 
   @Column()
   region: string; // Región de Colombia donde se vende el producto
+
+  @ManyToOne(() => UsuarioEntity, usuario => usuario.productos, { eager: true })
+  usuario: UsuarioEntity;
+
 }
