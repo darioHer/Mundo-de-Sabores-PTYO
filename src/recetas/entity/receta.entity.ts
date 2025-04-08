@@ -3,7 +3,6 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'ty
 import { UsuarioRecetaFavoritaEntity } from '../favoritos/usuario_receta_favorita.entity';
 import { CalificacionEntity } from './calificacion.entity';
 import { CategoriaEntity } from 'src/categorias/entity/categoria.entity';
-import { ImagenEntity } from 'src/imagenes/entity/imagen.entity';
 
 @Entity('recetas')
 export class RecetaEntity {
@@ -37,8 +36,7 @@ export class RecetaEntity {
   @ManyToOne(() => CategoriaEntity, categoria => categoria.recetas, { eager: true })
   categoria: CategoriaEntity;
 
-  @OneToMany(() => ImagenEntity, imagen => imagen.receta, { cascade: true })
-  imagenes: ImagenEntity[];
+
 
 
 

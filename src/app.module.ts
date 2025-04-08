@@ -9,9 +9,6 @@ import { RecetasModule } from './recetas/recetas.module';
 import { ComentariosModule } from './comentarios/comentarios.module';
 import { ProductosModule } from './productos/productos.module';
 import { CategoriasModule } from './categorias/categorias.module';
-import { ImagenesController } from './imagenes/imagenes.controller';
-import { ImagenesService } from './imagenes/imagenes.service';
-import { ImagenesModule } from './imagenes/imagenes.module';
 
 @Module({
   imports: [
@@ -47,13 +44,13 @@ import { ImagenesModule } from './imagenes/imagenes.module';
   
   CategoriasModule,
   
-  ImagenesModule,
+
 
   
 
 
   ],
-  controllers: [AppController, ImagenesController, ],
-  providers: [AppService, ConfigService, ImagenesService,],
+  controllers: [AppController,  ],
+  providers: [AppService, ConfigService, ],
 })
 export class AppModule {}
