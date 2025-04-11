@@ -5,7 +5,7 @@ import { ComentarioEntity } from './entity/comentario.entity';
 import { CreateComentarioDto } from './dto/create-comentario.dto';
 import { UpdateComentarioDto } from './dto/update-comentario.dto';
 import { UsuarioEntity } from 'src/auth/entity/usuario.entity';
-
+import { RecetaEntity } from 'src/recetas/entity/receta.entity';
 
 @Injectable()
 export class ComentariosService {
@@ -15,6 +15,9 @@ export class ComentariosService {
 
     @InjectRepository(UsuarioEntity)
     private readonly usuarioRepository: Repository<UsuarioEntity>,
+
+    @InjectRepository(RecetaEntity)
+    private readonly recetaRepository: Repository<RecetaEntity>,
   ) {}
 
   async create(createComentarioDto: CreateComentarioDto): Promise<ComentarioEntity> {
@@ -23,9 +26,15 @@ export class ComentariosService {
       throw new NotFoundException(`Usuario con ID ${createComentarioDto.usuarioId} no encontrado`);
     }
 
+    const receta = await this.recetaRepository.findOne({ where: { id: createComentarioDto.recetaId } });
+    if (!receta) {
+      throw new NotFoundException(`Receta con ID ${createComentarioDto.recetaId} no encontrada`);
+    }
+
     const comentario = this.comentarioRepository.create({
       contenido: createComentarioDto.contenido,
-      usuario: usuario,
+      usuario,
+      receta,
     });
 
     return await this.comentarioRepository.save(comentario);
@@ -33,7 +42,7 @@ export class ComentariosService {
 
   async findAll(): Promise<ComentarioEntity[]> {
     return await this.comentarioRepository.find({
-      relations: ['usuario'],
+      relations: ['usuario', 'receta'],
     });
   }
 
@@ -49,6 +58,12 @@ export class ComentariosService {
       comentario.usuario = usuario;
     }
 
+    if (updateComentarioDto.recetaId) {
+      const receta = await this.recetaRepository.findOne({ where: { id: updateComentarioDto.recetaId } });
+      if (!receta) throw new NotFoundException(`Receta con ID ${updateComentarioDto.recetaId} no encontrada`);
+      comentario.receta = receta;
+    }
+
     if (updateComentarioDto.contenido) {
       comentario.contenido = updateComentarioDto.contenido;
     }
@@ -62,6 +77,6 @@ export class ComentariosService {
       throw new NotFoundException(`Comentario ${id} no encontrado`);
     }
   }
-
-  
 }
+
+

@@ -1,8 +1,7 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Req } from '@nestjs/common';
+import {  Controller,  Get,  Post,  Body,  Param,  Put,  Delete,  Req,} from '@nestjs/common';
 import { RecetasService } from './recetas.service';
 import { CreateRecetaDto } from './dto/create-receta.dto';
 import { UpdateRecetaDto } from './dto/update-receta.dto';
-import { CalificarRecetaDto } from './dto/calificar-receta.dto';
 
 
 @Controller('recetas')
@@ -11,47 +10,33 @@ export class RecetasController {
 
   @Post()
   async create(@Body() createRecetaDto: CreateRecetaDto) {
-    return await this.recetasService.create(createRecetaDto);
+    return this.recetasService.create(createRecetaDto);
   }
 
   @Get()
   async findAll() {
-    return await this.recetasService.findAll();
+    return this.recetasService.findAll();
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number) {
-    return await this.recetasService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return this.recetasService.findOne(Number(id));
   }
 
   @Put(':id')
-  async update(@Param('id') id: number, @Body() updateRecetaDto: UpdateRecetaDto) {
-    return await this.recetasService.update(id, updateRecetaDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateRecetaDto: UpdateRecetaDto,
+  ) {
+    return this.recetasService.update(Number(id), updateRecetaDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number) {
-    return await this.recetasService.remove(id);
+  async remove(@Param('id') id: string) {
+    return this.recetasService.remove(Number(id));
   }
 
-  @Post(':id/favoritos')
-async marcarFavorito(
-  @Param('id') recetaId: number,
-  @Req() req: any,
-) {
-  return this.recetasService.marcarFavorito(recetaId, req.user.sub);
-}
 
-@Get('/usuarios/:id/favoritos')
-async getFavoritos(@Param('id') usuarioId: number) {
-  return this.recetasService.obtenerFavoritosPorUsuario(usuarioId);
-}
-@Post(':id/calificar')
-async calificar(
-  @Param('id') recetaId: number,
-  @Req() req: any,
-  @Body() dto: CalificarRecetaDto,
-) {
-  return this.recetasService.calificarReceta(recetaId, req.user.sub, dto);
-}
+
+
 }

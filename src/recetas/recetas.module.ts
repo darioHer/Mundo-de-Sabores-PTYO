@@ -4,12 +4,15 @@ import { RecetasService } from './recetas.service';
 import { RecetasController } from './recetas.controller';
 import { RecetaEntity } from './entity/receta.entity';
 import { UsuarioEntity } from 'src/auth/entity/usuario.entity';
-import { UsuarioRecetaFavoritaEntity } from './favoritos/usuario_receta_favorita.entity';
-import { CalificacionEntity } from './entity/calificacion.entity';
+import { ComentarioEntity } from 'src/comentarios/entity/comentario.entity';
+import { CategoriasModule } from 'src/categorias/categorias.module';
+import { CategoriaEntity } from 'src/categorias/entity/categoria.entity';
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([RecetaEntity, UsuarioEntity,UsuarioRecetaFavoritaEntity,CalificacionEntity])],
+  imports: [TypeOrmModule.forFeature([
+    RecetaEntity, UsuarioEntity,ComentarioEntity,CategoriaEntity]),CategoriasModule],
+
   controllers: [RecetasController],
   providers: [RecetasService],
 })

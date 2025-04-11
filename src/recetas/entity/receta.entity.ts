@@ -3,6 +3,8 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'ty
 import { UsuarioRecetaFavoritaEntity } from '../favoritos/usuario_receta_favorita.entity';
 import { CalificacionEntity } from './calificacion.entity';
 import { CategoriaEntity } from 'src/categorias/entity/categoria.entity';
+import { ComentarioEntity } from 'src/comentarios/entity/comentario.entity';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
 @Entity('recetas')
 export class RecetaEntity {
@@ -24,6 +26,7 @@ export class RecetaEntity {
   @Column()
   region: string; // Región de Colombia
 
+
   @ManyToOne(() => UsuarioEntity, usuario => usuario.recetas, { eager: true })
   usuario: UsuarioEntity;
 
@@ -36,6 +39,8 @@ export class RecetaEntity {
   @ManyToOne(() => CategoriaEntity, categoria => categoria.recetas, { eager: true })
   categoria: CategoriaEntity;
 
+  @OneToMany(() => ComentarioEntity, comentario => comentario.receta, { cascade: true })
+  comentarios: ComentarioEntity[];
 
 
 

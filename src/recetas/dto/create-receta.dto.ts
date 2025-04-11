@@ -19,4 +19,9 @@ export class CreateRecetaDto {
 
   @IsNotEmpty()
   region: string; 
+
+  
+  @IsNotEmpty()
+  @IsNumber()
+  categoriaId: number;
 }
