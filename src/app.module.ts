@@ -1,14 +1,15 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { DB_DATABASE, DB_HOST, DB_PASSWORD, DB_PORT, DB_USER } from './config/constans';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { RecetasModule } from './recetas/recetas.module';
-import { ComentariosModule } from './comentarios/comentarios.module';
-import { ProductosModule } from './productos/productos.module';
-import { CategoriasModule } from './categorias/categorias.module';
+import { AuthModule } from './auth/module/auth.module';
+import { CategoriasModule } from './categorias/module/categorias.module';
+import { ComentariosModule } from './comentarios/module/comentarios.module';
+import { DB_DATABASE, DB_HOST, DB_PASSWORD, DB_PORT, DB_USER } from './config/constans';
+import { ProductosModule } from './productos/module/productos.module';
+import { RecetasModule } from './recetas/module/recetas.module';
+import { RolesModule } from './roles/module/roles.module';
 
 @Module({
   imports: [
@@ -43,6 +44,8 @@ import { CategoriasModule } from './categorias/categorias.module';
   ProductosModule,
   
   CategoriasModule,
+  
+  RolesModule,
   
 
 
