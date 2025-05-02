@@ -1,4 +1,4 @@
-import { IsOptional, IsNotEmpty } from 'class-validator';
+import { IsOptional, IsNotEmpty, IsNumber } from 'class-validator';
 
 export class UpdateRecetaDto {
   @IsOptional()
@@ -19,5 +19,9 @@ export class UpdateRecetaDto {
 
   @IsOptional()
   @IsNotEmpty()
-  region?: string; // Región de Colombia
+  region?: string;
+
+  @IsOptional()
+  @IsNumber()
+  categoriaId?: number;
 }

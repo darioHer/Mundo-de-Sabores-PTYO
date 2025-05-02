@@ -1,4 +1,4 @@
-import {    Injectable,    NotFoundException} from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoriaEntity } from 'src/models/categoria.entity';
 import { RecetaEntity } from 'src/models/receta.entity';
@@ -20,7 +20,8 @@ export class RecetasService {
     private readonly categoriaRepository: Repository<CategoriaEntity>,
   ) {}
 
-  async create(createRecetaDto: CreateRecetaDto, usuarioId: number): Promise<RecetaEntity> {
+  // ✅ Crear receta (aprobada automáticamente si es admin)
+  async create(createRecetaDto: CreateRecetaDto, usuarioId: number, rol: string): Promise<RecetaEntity> {
     const { categoriaId, ...data } = createRecetaDto;
 
     const usuario = await this.usuarioRepository.findOne({ where: { id: usuarioId } });
@@ -33,20 +34,31 @@ export class RecetasService {
       ...data,
       usuario,
       categoria,
-      aprobado: false,
+      aprobado: rol === 'admin',
     });
 
     return await this.recetaRepository.save(receta);
   }
 
+  // ✅ Recetas pendientes (solo admin)
+  async findPendientes(): Promise<RecetaEntity[]> {
+    return this.recetaRepository.find({
+      where: { aprobado: false },
+      relations: ['usuario', 'categoria'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  // ✅ Recetas aprobadas (públicas)
   async findAll(): Promise<RecetaEntity[]> {
     return this.recetaRepository.find({
       where: { aprobado: true },
       relations: ['usuario', 'categoria'],
-      order: { createdAt: 'DESC' }, 
+      order: { createdAt: 'DESC' },
     });
   }
 
+  // ✅ Obtener receta por ID
   async findOne(id: number): Promise<RecetaEntity> {
     const receta = await this.recetaRepository.findOne({
       where: { id },
@@ -60,18 +72,32 @@ export class RecetasService {
     return receta;
   }
 
+  // ✅ Actualizar receta
   async update(id: number, updateRecetaDto: UpdateRecetaDto): Promise<RecetaEntity> {
     const receta = await this.recetaRepository.preload({ id, ...updateRecetaDto });
     if (!receta) throw new NotFoundException(`Receta con ID ${id} no encontrada`);
     return this.recetaRepository.save(receta);
   }
 
-  async remove(id: number): Promise<void> {
-    const receta = await this.recetaRepository.findOne({ where: { id } });
-    if (!receta) throw new NotFoundException(`Receta con ID ${id} no encontrada`);
+  // ✅ Eliminar receta (user: solo si no ha sido aprobada, admin: siempre puede)
+  async remove(id: number, userId?: number, userRole?: string): Promise<void> {
+    const receta = await this.recetaRepository.findOne({
+      where: { id },
+      relations: ['usuario'],
+    });
+
+    if (!receta) {
+      throw new NotFoundException(`Receta con ID ${id} no encontrada`);
+    }
+
+    if (userRole !== 'admin' && receta.aprobado) {
+      throw new ForbiddenException('No puedes eliminar una receta ya aprobada');
+    }
+
     await this.recetaRepository.remove(receta);
   }
 
+  // ✅ Recetas destacadas
   async findDestacadas(): Promise<RecetaEntity[]> {
     return this.recetaRepository.find({
       where: { aprobado: true },
@@ -81,10 +107,25 @@ export class RecetasService {
     });
   }
 
+  // ✅ Aprobar receta
   async aprobar(id: number): Promise<RecetaEntity> {
     const receta = await this.recetaRepository.findOne({ where: { id } });
     if (!receta) throw new NotFoundException('Receta no encontrada');
     receta.aprobado = true;
     return this.recetaRepository.save(receta);
+  }
+
+  // ✅ Buscar recetas por usuario (retorna separadas)
+  async findByUsuario(usuarioId: number): Promise<{ aprobadas: RecetaEntity[], pendientes: RecetaEntity[] }> {
+    const todas = await this.recetaRepository.find({
+      where: { usuario: { id: usuarioId } },
+      relations: ['categoria'],
+      order: { createdAt: 'DESC' },
+    });
+
+    return {
+      aprobadas: todas.filter(r => r.aprobado),
+      pendientes: todas.filter(r => !r.aprobado),
+    };
   }
 }

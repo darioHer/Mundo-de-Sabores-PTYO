@@ -13,9 +13,6 @@ export class CreateRecetaDto {
   @IsNotEmpty()
   instructions: string;
 
-  @IsNotEmpty()
-  @IsNumber()
-  usuarioId: number;
 
   @IsNotEmpty()
   region: string; 
