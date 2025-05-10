@@ -7,9 +7,10 @@ import { RolEntity } from 'src/models/rol.entity';
 import { RolesModule } from 'src/roles/module/roles.module';
 import { UsuarioEntity } from '../../models/usuario.entity';
 
-import { AuthController } from '../controller/auth.controller';
+
 import { AuthService } from '../service/auth.service';
 import { JwtStrategy } from '../strategy/jwt.strategy';
+import { AuthController } from '../controller/auth.controller';
 
 @Module({
   imports: [
