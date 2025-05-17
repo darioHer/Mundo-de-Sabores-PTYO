@@ -30,7 +30,7 @@ export class RecetasService {
     const categoria = await this.categoriaRepository.findOne({ where: { id: categoriaId } });
     if (!categoria) throw new NotFoundException('Categoría no encontrada');
 
-    // 🚫 Validar si el usuario ya tiene una receta con el mismo título
+    //  Validar si el usuario ya tiene una receta con el mismo título
     const recetaExistente = await this.recetaRepository.findOne({
       where: {
         title,

@@ -8,8 +8,8 @@ export class ProductoEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  name: string; // Nombre del producto
+  @Column({ unique: true })
+  name: string;  // Nombre del producto
 
   @Column()
   description: string; // Descripción del producto
@@ -28,6 +28,6 @@ export class ProductoEntity {
 
 
 
-  
+
 
 }

@@ -1,8 +1,12 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { ProductoEntity } from 'src/models/producto.entity';
 import { UsuarioEntity } from 'src/models/usuario.entity';
-import { Repository } from 'typeorm';
 import { CreateProductoDto } from '../dto/create-producto.dto';
 import { UpdateProductoDto } from '../dto/update-producto.dto';
 
@@ -15,7 +19,11 @@ export class ProductosService {
     private readonly usuarioRepository: Repository<UsuarioEntity>,
   ) {}
 
-  async create(createProductoDto: CreateProductoDto, usuarioId: number): Promise<ProductoEntity> {
+  // Crear producto (valida duplicado y asocia usuario)
+  async create(
+    createProductoDto: CreateProductoDto,
+    usuarioId: number,
+  ): Promise<ProductoEntity> {
     const { name, ...rest } = createProductoDto;
 
     const existe = await this.productoRepository.findOne({ where: { name } });
@@ -23,7 +31,9 @@ export class ProductosService {
       throw new BadRequestException('El producto ya existe.');
     }
 
-    const usuario = await this.usuarioRepository.findOne({ where: { id: usuarioId } });
+    const usuario = await this.usuarioRepository.findOne({
+      where: { id: usuarioId },
+    });
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado.');
     }
@@ -37,6 +47,7 @@ export class ProductosService {
     return await this.productoRepository.save(producto);
   }
 
+  //  Listar productos con paginación
   async findAll(page: number = 1, limit: number = 10): Promise<ProductoEntity[]> {
     return await this.productoRepository.find({
       skip: (page - 1) * limit,
@@ -44,6 +55,7 @@ export class ProductosService {
     });
   }
 
+  //  Obtener producto por ID
   async findOne(id: number): Promise<ProductoEntity> {
     const producto = await this.productoRepository.findOne({
       where: { id },
@@ -57,6 +69,7 @@ export class ProductosService {
     return producto;
   }
 
+  // Obtener productos creados por un usuario
   async findByUsuario(usuarioId: number): Promise<ProductoEntity[]> {
     return await this.productoRepository.find({
       where: { usuario: { id: usuarioId } },
@@ -64,14 +77,37 @@ export class ProductosService {
     });
   }
 
-  async update(id: number, updateProductoDto: UpdateProductoDto): Promise<ProductoEntity> {
-    const result = await this.productoRepository.update(id, updateProductoDto);
-    if (result.affected === 0) {
+  //  Actualizar producto (valida duplicado por nombre)
+  async update(
+    id: number,
+    updateProductoDto: UpdateProductoDto,
+  ): Promise<ProductoEntity> {
+    const productoExistente = await this.productoRepository.findOne({
+      where: { id },
+    });
+
+    if (!productoExistente) {
       throw new NotFoundException(`Producto con id ${id} no encontrado`);
     }
-    return await this.findOne(id);
+
+    if (
+      updateProductoDto.name &&
+      updateProductoDto.name !== productoExistente.name
+    ) {
+      const duplicado = await this.productoRepository.findOne({
+        where: { name: updateProductoDto.name },
+      });
+
+      if (duplicado) {
+        throw new BadRequestException('Ya existe otro producto con ese nombre.');
+      }
+    }
+
+    const actualizado = Object.assign(productoExistente, updateProductoDto);
+    return await this.productoRepository.save(actualizado);
   }
 
+  //  Eliminar producto
   async remove(id: number): Promise<void> {
     const producto = await this.findOne(id);
     await this.productoRepository.remove(producto);

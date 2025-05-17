@@ -7,7 +7,7 @@ export class CategoriaEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   nombre: string;
 
   @OneToMany(() => RecetaEntity, receta => receta.categoria)
