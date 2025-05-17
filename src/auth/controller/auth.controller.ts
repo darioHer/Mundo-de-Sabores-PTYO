@@ -5,6 +5,7 @@ import { LoginDto } from '../dto/login.dto';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { Roles } from 'src/decorator/roles.decorator';
+import { Public } from 'src/decorator/public.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -12,12 +13,14 @@ export class AuthController {
 
   // ✅ Registro
   @Post('register')
+  @Public()
   async register(@Body() registerDto: RegisterDto) {
     return await this.authService.register(registerDto);
   }
 
   // ✅ Login
   @Post('login')
+  @Public()
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto) {
     return await this.authService.login(loginDto);

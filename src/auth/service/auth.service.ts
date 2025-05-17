@@ -73,22 +73,27 @@ export class AuthService {
       where: { username: loginDto.username },
       relations: ['rol'],
     });
-
+  
     if (!usuario || !(await compare(loginDto.password, usuario.password))) {
       throw new UnauthorizedException('Credenciales incorrectas.');
     }
-
+  
+    if (!usuario.rol || !usuario.rol.name) {
+      throw new UnauthorizedException('Rol no reconocido o no asignado al usuario.');
+    }
+  
     const payload = {
       sub: usuario.id,
       username: usuario.username,
-      rol: usuario.rol?.name,
+      rol: usuario.rol.name,
     };
-
+  
     return {
       access_token: this.jwtService.sign(payload),
       userId: usuario.id,
     };
   }
+  
 
   // Validación manual (no expone datos)
   async validateUser(username: string): Promise<UsuarioEntity | null> {
