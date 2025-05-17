@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 
 export class CreateProductoDto {
   @IsNotEmpty()
@@ -13,8 +13,6 @@ export class CreateProductoDto {
   @IsNotEmpty()
   region: string; 
 
-  @IsNotEmpty()
-  @IsNumber()
-  usuarioId: number;
+
 
 }

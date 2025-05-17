@@ -4,9 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { ProductoEntity } from 'src/models/producto.entity';
 import { UsuarioEntity } from 'src/models/usuario.entity';
+import { Repository } from 'typeorm';
 import { CreateProductoDto } from '../dto/create-producto.dto';
 import { UpdateProductoDto } from '../dto/update-producto.dto';
 
@@ -42,20 +42,22 @@ export class ProductosService {
       name,
       ...rest,
       usuario,
+      aprobado: false, // se crea como no aprobado por defecto
     });
 
     return await this.productoRepository.save(producto);
   }
 
-  //  Listar productos con paginación
+  // Listar productos con paginación
   async findAll(page: number = 1, limit: number = 10): Promise<ProductoEntity[]> {
     return await this.productoRepository.find({
       skip: (page - 1) * limit,
       take: limit,
+      relations: ['usuario'],
     });
   }
 
-  //  Obtener producto por ID
+  // Obtener producto por ID
   async findOne(id: number): Promise<ProductoEntity> {
     const producto = await this.productoRepository.findOne({
       where: { id },
@@ -77,7 +79,7 @@ export class ProductosService {
     });
   }
 
-  //  Actualizar producto (valida duplicado por nombre)
+  // Actualizar producto (valida duplicado por nombre)
   async update(
     id: number,
     updateProductoDto: UpdateProductoDto,
@@ -107,9 +109,21 @@ export class ProductosService {
     return await this.productoRepository.save(actualizado);
   }
 
-  //  Eliminar producto
+  // Eliminar producto
   async remove(id: number): Promise<void> {
     const producto = await this.findOne(id);
     await this.productoRepository.remove(producto);
+  }
+
+  // Aprobar producto (admin)
+  async aprobarProducto(id: number): Promise<ProductoEntity> {
+    const producto = await this.findOne(id);
+
+    if (producto.aprobado) {
+      throw new BadRequestException('Este producto ya fue aprobado.');
+    }
+
+    producto.aprobado = true;
+    return await this.productoRepository.save(producto);
   }
 }

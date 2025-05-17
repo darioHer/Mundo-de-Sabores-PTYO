@@ -20,6 +20,9 @@ export class ProductoEntity {
   @Column()
   region: string; // Región de Colombia donde se vende el producto
 
+  @Column({ default: false })
+  aprobado: boolean;
+
   @ManyToOne(() => UsuarioEntity, usuario => usuario.productos, { eager: true })
   usuario: UsuarioEntity;
 

@@ -1,9 +1,21 @@
-import {  Controller,  Get,  Post,  Body,  Param,  Put,  Delete,  UseGuards,  Req,  ParseIntPipe,} from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AutorOrAdminGuard } from 'src/auth/guard/autor-or-admin.guard';
-import { ProductosService } from '../service/productos.service';
+import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { CreateProductoDto } from '../dto/create-producto.dto';
 import { UpdateProductoDto } from '../dto/update-producto.dto';
+import { ProductosService } from '../service/productos.service';
 
 @Controller('productos')
 export class ProductosController {
@@ -35,7 +47,10 @@ export class ProductosController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard, AutorOrAdminGuard)
-  async update(@Param('id', ParseIntPipe) id: number, @Body() updateProductoDto: UpdateProductoDto) {
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateProductoDto: UpdateProductoDto,
+  ) {
     return await this.productosService.update(id, updateProductoDto);
   }
 
@@ -43,5 +58,11 @@ export class ProductosController {
   @UseGuards(JwtAuthGuard, AutorOrAdminGuard)
   async remove(@Param('id', ParseIntPipe) id: number) {
     return await this.productosService.remove(id);
+  }
+
+  @Patch(':id/aprobar')
+  @UseGuards(JwtAuthGuard)
+  async aprobarProducto(@Param('id', ParseIntPipe) id: number) {
+    return await this.productosService.aprobarProducto(id);
   }
 }

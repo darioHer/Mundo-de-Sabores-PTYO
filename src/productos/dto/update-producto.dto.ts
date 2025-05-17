@@ -1,4 +1,4 @@
-import { IsOptional, IsNotEmpty } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class UpdateProductoDto {
   @IsOptional()
@@ -16,4 +16,9 @@ export class UpdateProductoDto {
   @IsOptional()
   @IsNotEmpty()
   region?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  aprobado?: boolean;
+
 }
