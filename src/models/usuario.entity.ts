@@ -1,9 +1,8 @@
 import { ComentarioEntity } from 'src/models/comentario.entity';
 import { RolEntity } from 'src/models/rol.entity';
 import { RecetaEntity } from 'src/models/receta.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ProductoEntity } from 'src/models/producto.entity';
-
+import {  Column,  Entity,  JoinColumn,  ManyToOne,  OneToMany,  PrimaryGeneratedColumn,  CreateDateColumn,  UpdateDateColumn,} from 'typeorm';
 
 @Entity('usuarios')
 export class UsuarioEntity {
@@ -19,6 +18,20 @@ export class UsuarioEntity {
   @Column()
   password: string;
 
+  @Column({ nullable: true })
+  avatarUrl: string;
+
+  @Column({ nullable: true })
+  nombres: string;
+
+  @Column({ nullable: true })
+  apellidos: string;
+
+  @Column({ type: 'date', nullable: true })
+  fechaNacimiento: Date;
+
+  @Column({ type: 'text', nullable: true })
+  biografia: string;
 
   @OneToMany(() => RecetaEntity, receta => receta.usuario)
   recetas: RecetaEntity[];
@@ -29,13 +42,13 @@ export class UsuarioEntity {
   @OneToMany(() => ComentarioEntity, comentario => comentario.usuario)
   comentarios: ComentarioEntity[];
 
-
-
-
-
   @ManyToOne(() => RolEntity, rol => rol.usuarios)
   @JoinColumn({ name: 'rolId' })
   rol: RolEntity;
 
+  @CreateDateColumn()
+  createdAt: Date;
 
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

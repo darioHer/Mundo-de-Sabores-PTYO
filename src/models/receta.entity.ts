@@ -44,7 +44,7 @@ export class RecetaEntity {
   @OneToMany(() => ComentarioEntity, comentario => comentario.receta, { cascade: true })
   comentarios: ComentarioEntity[];
 
-  
+
 
 
 
