@@ -8,6 +8,7 @@ import { UsuarioEntity } from 'src/models/usuario.entity';
 import { ProductosModule } from 'src/productos/module/productos.module';
 import { RecetasController } from '../controller/recetas.controller';
 import { RecetasService } from '../service/recetas.service';
+import { RegionEntity } from 'src/models/region.entity';
 
 
 @Module({
@@ -17,6 +18,7 @@ import { RecetasService } from '../service/recetas.service';
       UsuarioEntity,
       ComentarioEntity,
       CategoriaEntity,
+      RegionEntity,
     ]),
     CategoriasModule,
     forwardRef(() => ProductosModule),

@@ -20,6 +20,7 @@ import {
   DB_PORT,
   DB_USER,
 } from './config/constans';
+import { RegionesModule } from './regiones/regiones.module';
 
 @Module({
   imports: [
@@ -50,7 +51,8 @@ import {
     ProductosModule,
     CategoriasModule,
     RolesModule,
-    UsersModule, 
+    UsersModule,
+    RegionesModule, 
   ],
 
   controllers: [AppController], 

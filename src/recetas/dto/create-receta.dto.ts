@@ -15,7 +15,9 @@ export class CreateRecetaDto {
 
 
   @IsNotEmpty()
-  region: string; 
+  regionId?: number; 
+
+
 
   
   @IsNotEmpty()

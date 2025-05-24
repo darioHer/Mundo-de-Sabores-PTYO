@@ -19,7 +19,7 @@ export class UpdateRecetaDto {
 
   @IsOptional()
   @IsNotEmpty()
-  region?: string;
+  regionId?: number;
 
   @IsOptional()
   @IsNumber()

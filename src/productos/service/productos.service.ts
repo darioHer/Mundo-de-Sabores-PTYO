@@ -19,7 +19,6 @@ export class ProductosService {
     private readonly usuarioRepository: Repository<UsuarioEntity>,
   ) {}
 
-  // Crear producto (valida duplicado y asocia usuario)
   async create(
     createProductoDto: CreateProductoDto,
     usuarioId: number,
@@ -42,13 +41,12 @@ export class ProductosService {
       name,
       ...rest,
       usuario,
-      aprobado: false, // se crea como no aprobado por defecto
+      aprobado: false,
     });
 
     return await this.productoRepository.save(producto);
   }
 
-  // Listar productos con paginación
   async findAll(page: number = 1, limit: number = 10): Promise<ProductoEntity[]> {
     return await this.productoRepository.find({
       skip: (page - 1) * limit,
@@ -57,7 +55,6 @@ export class ProductosService {
     });
   }
 
-  // Obtener producto por ID
   async findOne(id: number): Promise<ProductoEntity> {
     const producto = await this.productoRepository.findOne({
       where: { id },
@@ -71,7 +68,6 @@ export class ProductosService {
     return producto;
   }
 
-  // Obtener productos creados por un usuario
   async findByUsuario(usuarioId: number): Promise<ProductoEntity[]> {
     return await this.productoRepository.find({
       where: { usuario: { id: usuarioId } },
@@ -79,7 +75,6 @@ export class ProductosService {
     });
   }
 
-  // Actualizar producto (valida duplicado por nombre)
   async update(
     id: number,
     updateProductoDto: UpdateProductoDto,
@@ -109,13 +104,11 @@ export class ProductosService {
     return await this.productoRepository.save(actualizado);
   }
 
-  // Eliminar producto
   async remove(id: number): Promise<void> {
     const producto = await this.findOne(id);
     await this.productoRepository.remove(producto);
   }
 
-  // Aprobar producto (admin)
   async aprobarProducto(id: number): Promise<ProductoEntity> {
     const producto = await this.findOne(id);
 
@@ -125,5 +118,21 @@ export class ProductosService {
 
     producto.aprobado = true;
     return await this.productoRepository.save(producto);
+  }
+
+  // ✅ NUEVOS MÉTODOS
+
+  async findAprobados(): Promise<ProductoEntity[]> {
+    return await this.productoRepository.find({
+      where: { aprobado: true },
+      relations: ['usuario', 'categoria'], // asegúrate que 'categoria' esté definido
+    });
+  }
+
+  async findNoAprobados(): Promise<ProductoEntity[]> {
+    return await this.productoRepository.find({
+      where: { aprobado: false },
+      relations: ['usuario', 'categoria'],
+    });
   }
 }

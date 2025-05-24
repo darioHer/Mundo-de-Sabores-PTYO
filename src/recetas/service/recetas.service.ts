@@ -1,9 +1,17 @@
-import { Injectable, NotFoundException, ForbiddenException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
 import { CategoriaEntity } from 'src/models/categoria.entity';
 import { RecetaEntity } from 'src/models/receta.entity';
 import { UsuarioEntity } from 'src/models/usuario.entity';
-import { Repository } from 'typeorm';
+import { RegionEntity } from 'src/models/region.entity';
+
 import { CreateRecetaDto } from '../dto/create-receta.dto';
 import { UpdateRecetaDto } from '../dto/update-receta.dto';
 
@@ -18,11 +26,13 @@ export class RecetasService {
 
     @InjectRepository(CategoriaEntity)
     private readonly categoriaRepository: Repository<CategoriaEntity>,
+
+    @InjectRepository(RegionEntity)
+    private readonly regionRepository: Repository<RegionEntity>,
   ) {}
 
-  // Crear receta (evita duplicados por usuario + título)
   async create(createRecetaDto: CreateRecetaDto, usuarioId: number, rol: string): Promise<RecetaEntity> {
-    const { categoriaId, title, ...data } = createRecetaDto;
+    const { categoriaId, regionId, title, ...data } = createRecetaDto;
 
     const usuario = await this.usuarioRepository.findOne({ where: { id: usuarioId } });
     if (!usuario) throw new NotFoundException('Usuario no encontrado');
@@ -30,12 +40,8 @@ export class RecetasService {
     const categoria = await this.categoriaRepository.findOne({ where: { id: categoriaId } });
     if (!categoria) throw new NotFoundException('Categoría no encontrada');
 
-    //  Validar si el usuario ya tiene una receta con el mismo título
     const recetaExistente = await this.recetaRepository.findOne({
-      where: {
-        title,
-        usuario: { id: usuarioId },
-      },
+      where: { title, usuario: { id: usuarioId } },
       relations: ['usuario'],
     });
 
@@ -43,40 +49,44 @@ export class RecetasService {
       throw new ConflictException('Ya tienes una receta con ese título.');
     }
 
-    const receta = this.recetaRepository.create({
+    const recetaData: Partial<RecetaEntity> = {
       title,
       ...data,
       usuario,
       categoria,
       aprobado: rol === 'admin',
-    });
+    };
 
-    return await this.recetaRepository.save(receta);
+    if (regionId) {
+      const region = await this.regionRepository.findOne({ where: { id: regionId } });
+      if (!region) throw new NotFoundException('Región no encontrada');
+      recetaData.region = region;
+    }
+
+    const receta = this.recetaRepository.create(recetaData);
+    return this.recetaRepository.save(receta);
   }
 
-  //  Recetas pendientes (solo admin)
   async findPendientes(): Promise<RecetaEntity[]> {
     return this.recetaRepository.find({
       where: { aprobado: false },
-      relations: ['usuario', 'categoria'],
+      relations: ['usuario', 'categoria', 'region'],
       order: { createdAt: 'DESC' },
     });
   }
 
-  //  Recetas aprobadas (públicas)
   async findAll(): Promise<RecetaEntity[]> {
     return this.recetaRepository.find({
       where: { aprobado: true },
-      relations: ['usuario', 'categoria'],
+      relations: ['usuario', 'categoria', 'region'],
       order: { createdAt: 'DESC' },
     });
   }
 
-  //  Obtener receta por ID
   async findOne(id: number): Promise<RecetaEntity> {
     const receta = await this.recetaRepository.findOne({
       where: { id },
-      relations: ['usuario', 'categoria'],
+      relations: ['usuario', 'categoria', 'region'],
     });
 
     if (!receta) {
@@ -86,14 +96,39 @@ export class RecetasService {
     return receta;
   }
 
-  //  Actualizar receta
   async update(id: number, updateRecetaDto: UpdateRecetaDto): Promise<RecetaEntity> {
-    const receta = await this.recetaRepository.preload({ id, ...updateRecetaDto });
-    if (!receta) throw new NotFoundException(`Receta con ID ${id} no encontrada`);
-    return this.recetaRepository.save(receta);
+    const { categoriaId, regionId, ...resto } = updateRecetaDto;
+  
+    const receta = await this.recetaRepository.findOne({
+      where: { id },
+      relations: ['categoria', 'region'],
+    });
+  
+    if (!receta) {
+      throw new NotFoundException(`Receta con ID ${id} no encontrada`);
+    }
+  
+    // Actualizar campos básicos
+    Object.assign(receta, resto);
+  
+    // Si se envía nueva categoría
+    if (categoriaId) {
+      const categoria = await this.categoriaRepository.findOne({ where: { id: categoriaId } });
+      if (!categoria) throw new NotFoundException('Categoría no encontrada');
+      receta.categoria = categoria;
+    }
+  
+    // Si se envía nueva región
+    if (regionId) {
+      const region = await this.regionRepository.findOne({ where: { id: regionId } });
+      if (!region) throw new NotFoundException('Región no encontrada');
+      receta.region = region;
+    }
+  
+    return await this.recetaRepository.save(receta);
   }
+  
 
-  //  Eliminar receta (user: solo si no ha sido aprobada, admin: siempre puede)
   async remove(id: number, userId?: number, userRole?: string): Promise<void> {
     const receta = await this.recetaRepository.findOne({
       where: { id },
@@ -111,17 +146,15 @@ export class RecetasService {
     await this.recetaRepository.remove(receta);
   }
 
-  //  Recetas destacadas
   async findDestacadas(): Promise<RecetaEntity[]> {
     return this.recetaRepository.find({
       where: { aprobado: true },
-      relations: ['usuario', 'categoria'],
+      relations: ['usuario', 'categoria', 'region'],
       order: { createdAt: 'DESC' },
       take: 3,
     });
   }
 
-  //  Aprobar receta
   async aprobar(id: number): Promise<RecetaEntity> {
     const receta = await this.recetaRepository.findOne({ where: { id } });
     if (!receta) throw new NotFoundException('Receta no encontrada');
@@ -129,11 +162,10 @@ export class RecetasService {
     return this.recetaRepository.save(receta);
   }
 
-  // Buscar recetas por usuario (retorna separadas)
   async findByUsuario(usuarioId: number): Promise<{ aprobadas: RecetaEntity[], pendientes: RecetaEntity[] }> {
     const todas = await this.recetaRepository.find({
       where: { usuario: { id: usuarioId } },
-      relations: ['categoria'],
+      relations: ['categoria', 'region'],
       order: { createdAt: 'DESC' },
     });
 

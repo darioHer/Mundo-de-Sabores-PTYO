@@ -1,8 +1,8 @@
-import { CategoriaEntity } from 'src/models/categoria.entity';
-import { ComentarioEntity } from 'src/models/comentario.entity';
-import { UsuarioEntity } from 'src/models/usuario.entity';
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { UsuarioEntity } from "./usuario.entity";
+import { CategoriaEntity } from "./categoria.entity";
+import { ComentarioEntity } from "./comentario.entity";
+import { RegionEntity } from "./region.entity";
 
 @Entity('recetas')
 export class RecetaEntity {
@@ -21,9 +21,6 @@ export class RecetaEntity {
   @Column()
   instructions: string;
 
-  @Column()
-  region: string; // Región de Colombia
-
   @Column({ default: false })
   aprobado: boolean;
 
@@ -36,19 +33,12 @@ export class RecetaEntity {
   @ManyToOne(() => UsuarioEntity, usuario => usuario.recetas, { eager: true })
   usuario: UsuarioEntity;
 
-
-
   @ManyToOne(() => CategoriaEntity, categoria => categoria.recetas, { eager: true })
   categoria: CategoriaEntity;
 
   @OneToMany(() => ComentarioEntity, comentario => comentario.receta, { cascade: true })
   comentarios: ComentarioEntity[];
 
-
-
-
-
-
-  
-
+  @ManyToOne(() => RegionEntity, region => region.recetas)
+  region: RegionEntity;
 }
