@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductoEntity } from 'src/models/producto.entity';
 import { UsuarioEntity } from 'src/models/usuario.entity';
+import { RegionEntity } from 'src/models/region.entity';
 import { Repository } from 'typeorm';
 import { CreateProductoDto } from '../dto/create-producto.dto';
 import { UpdateProductoDto } from '../dto/update-producto.dto';
@@ -15,32 +16,40 @@ export class ProductosService {
   constructor(
     @InjectRepository(ProductoEntity)
     private readonly productoRepository: Repository<ProductoEntity>,
+
     @InjectRepository(UsuarioEntity)
     private readonly usuarioRepository: Repository<UsuarioEntity>,
+
+    @InjectRepository(RegionEntity)
+    private readonly regionRepository: Repository<RegionEntity>,
   ) {}
 
   async create(
     createProductoDto: CreateProductoDto,
     usuarioId: number,
   ): Promise<ProductoEntity> {
-    const { name, ...rest } = createProductoDto;
+    const { name, regionId, ...rest } = createProductoDto;
 
     const existe = await this.productoRepository.findOne({ where: { name } });
     if (existe) {
       throw new BadRequestException('El producto ya existe.');
     }
 
-    const usuario = await this.usuarioRepository.findOne({
-      where: { id: usuarioId },
-    });
+    const usuario = await this.usuarioRepository.findOne({ where: { id: usuarioId } });
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado.');
+    }
+
+    const region = await this.regionRepository.findOne({ where: { id: regionId } });
+    if (!region) {
+      throw new NotFoundException('Región no encontrada.');
     }
 
     const producto = this.productoRepository.create({
       name,
       ...rest,
       usuario,
+      region,
       aprobado: false,
     });
 
@@ -51,14 +60,14 @@ export class ProductosService {
     return await this.productoRepository.find({
       skip: (page - 1) * limit,
       take: limit,
-      relations: ['usuario'],
+      relations: ['usuario', 'categoria', 'region'],
     });
   }
 
   async findOne(id: number): Promise<ProductoEntity> {
     const producto = await this.productoRepository.findOne({
       where: { id },
-      relations: ['usuario'],
+      relations: ['usuario', 'categoria', 'region'],
     });
 
     if (!producto) {
@@ -71,7 +80,7 @@ export class ProductosService {
   async findByUsuario(usuarioId: number): Promise<ProductoEntity[]> {
     return await this.productoRepository.find({
       where: { usuario: { id: usuarioId } },
-      relations: ['usuario'],
+      relations: ['usuario', 'categoria', 'region'],
     });
   }
 
@@ -79,9 +88,7 @@ export class ProductosService {
     id: number,
     updateProductoDto: UpdateProductoDto,
   ): Promise<ProductoEntity> {
-    const productoExistente = await this.productoRepository.findOne({
-      where: { id },
-    });
+    const productoExistente = await this.productoRepository.findOne({ where: { id } });
 
     if (!productoExistente) {
       throw new NotFoundException(`Producto con id ${id} no encontrado`);
@@ -98,6 +105,18 @@ export class ProductosService {
       if (duplicado) {
         throw new BadRequestException('Ya existe otro producto con ese nombre.');
       }
+    }
+
+    if (updateProductoDto.regionId) {
+      const region = await this.regionRepository.findOne({
+        where: { id: updateProductoDto.regionId },
+      });
+
+      if (!region) {
+        throw new NotFoundException('Región no encontrada.');
+      }
+
+      productoExistente.region = region;
     }
 
     const actualizado = Object.assign(productoExistente, updateProductoDto);
@@ -120,19 +139,17 @@ export class ProductosService {
     return await this.productoRepository.save(producto);
   }
 
-  // ✅ NUEVOS MÉTODOS
-
   async findAprobados(): Promise<ProductoEntity[]> {
     return await this.productoRepository.find({
       where: { aprobado: true },
-      relations: ['usuario', 'categoria'], // asegúrate que 'categoria' esté definido
+      relations: ['usuario', 'categoria', 'region'],
     });
   }
 
   async findNoAprobados(): Promise<ProductoEntity[]> {
     return await this.productoRepository.find({
       where: { aprobado: false },
-      relations: ['usuario', 'categoria'],
+      relations: ['usuario', 'categoria', 'region'],
     });
   }
 }

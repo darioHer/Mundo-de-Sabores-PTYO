@@ -1,5 +1,6 @@
 import { CategoriaEntity } from 'src/models/categoria.entity';
 import { UsuarioEntity } from 'src/models/usuario.entity';
+import { RegionEntity } from 'src/models/region.entity'; // asegúrate de importar correctamente
 
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -9,16 +10,13 @@ export class ProductoEntity {
   id: number;
 
   @Column({ unique: true })
-  name: string;  // Nombre del producto
+  name: string;
 
   @Column()
-  description: string; // Descripción del producto
+  description: string;
 
   @Column('decimal')
-  price: number; // Precio del producto
-
-  @Column()
-  region: string; // Región de Colombia donde se vende el producto
+  price: number;
 
   @Column({ default: false })
   aprobado: boolean;
@@ -29,8 +27,6 @@ export class ProductoEntity {
   @ManyToOne(() => CategoriaEntity, categoria => categoria.productos, { eager: true })
   categoria: CategoriaEntity;
 
-
-
-
-
+  @ManyToOne(() => RegionEntity, region => region.productos, { eager: true })
+  region: RegionEntity;
 }

@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsNumber, IsPositive } from 'class-validator';
 
 export class UpdateProductoDto {
   @IsOptional()
@@ -10,15 +10,16 @@ export class UpdateProductoDto {
   description?: string;
 
   @IsOptional()
-  @IsNotEmpty()
+  @IsNumber()
+  @IsPositive()
   price?: number;
 
   @IsOptional()
-  @IsNotEmpty()
-  region?: string;
+  @IsNumber()
+  @IsPositive()
+  regionId?: number;
 
   @IsOptional()
   @IsBoolean()
   aprobado?: boolean;
-
 }
