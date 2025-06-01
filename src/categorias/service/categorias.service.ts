@@ -20,7 +20,6 @@ export class CategoriasService {
         private readonly recetaRepository: Repository<RecetaEntity>,
     ) { }
 
-    // Crear nueva categoría (evita duplicados)
     async create(dto: CreateCategoriaDto): Promise<CategoriaEntity> {
         const existe = await this.categoriaRepository.findOne({
             where: { nombre: dto.nombre },
@@ -34,15 +33,16 @@ export class CategoriasService {
         return await this.categoriaRepository.save(categoria);
     }
 
-    // Obtener todas las categorías con sus recetas asociadas
-    async findAll(): Promise<CategoriaEntity[]> {
-        return await this.categoriaRepository.find({
-            relations: ['recetas'],
-            order: { nombre: 'ASC' },
-        });
+    // 🔄 Nueva implementación que incluye recetaCount
+    async findAll(): Promise<any[]> {
+        return await this.categoriaRepository
+            .createQueryBuilder('categoria')
+            .leftJoin('categoria.recetas', 'receta')
+            .loadRelationCountAndMap('categoria.recetaCount', 'categoria.recetas')
+            .orderBy('categoria.nombre', 'ASC')
+            .getMany();
     }
 
-    // Obtener una categoría por ID con sus relaciones
     async findOne(id: number): Promise<CategoriaEntity> {
         const categoria = await this.categoriaRepository.findOne({
             where: { id },
@@ -56,17 +56,14 @@ export class CategoriasService {
         return categoria;
     }
 
-    // Obtener solo las recetas de una categoría
     async findRecetasByCategoria(id: number): Promise<RecetaEntity[]> {
         const categoria = await this.findOne(id);
         return categoria.recetas || [];
     }
 
-    // Actualizar datos de una categoría
     async update(id: number, dto: UpdateCategoriaDto): Promise<CategoriaEntity> {
         const existente = await this.findOne(id);
 
-        // Validar duplicado si cambia el nombre
         if (dto.nombre && dto.nombre !== existente.nombre) {
             const duplicada = await this.categoriaRepository.findOne({
                 where: { nombre: dto.nombre },
@@ -81,7 +78,6 @@ export class CategoriasService {
         return await this.categoriaRepository.save(actualizada);
     }
 
-    // Eliminar una categoría
     async remove(id: number): Promise<void> {
         const categoria = await this.findOne(id);
         await this.categoriaRepository.remove(categoria);

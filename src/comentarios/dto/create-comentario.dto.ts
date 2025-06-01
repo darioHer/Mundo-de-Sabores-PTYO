@@ -2,11 +2,9 @@ import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CreateComentarioDto {
   @IsNotEmpty()
-  recetaId: number; 
+  @IsNumber()
+  recetaId: number;
 
   @IsNotEmpty()
-  contenido: string; 
-
-  @IsNumber()
-  usuarioId: number;
+  contenido: string;
 }

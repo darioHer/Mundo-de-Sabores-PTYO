@@ -1,49 +1,48 @@
-import {  Body,  Controller,  Delete,  Get,  Param,  ParseIntPipe,  Post,  Put,  UseGuards,} from '@nestjs/common';
-
-
+import {
+  Controller,
+  Post,
+  Get,
+  Delete,
+  Body,
+  Param,
+  Req,
+  UseGuards,
+  ParseIntPipe,
+  ForbiddenException,
+} from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { Roles } from 'src/decorator/roles.decorator';
 import { ComentariosService } from '../service/comentarios.service';
 import { CreateComentarioDto } from '../dto/create-comentario.dto';
-import { ComentarioEntity } from 'src/models/comentario.entity';
-import { UpdateComentarioDto } from '../dto/update-comentario.dto';
 
 @Controller('comentarios')
 export class ComentariosController {
   constructor(private readonly comentariosService: ComentariosService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('usuario', 'admin')
-  async create(@Body() createComentarioDto: CreateComentarioDto): Promise<ComentarioEntity> {
-    return await this.comentariosService.create(createComentarioDto);
+  @UseGuards(JwtAuthGuard)
+  async create(@Body() dto: CreateComentarioDto, @Req() req) {
+    const userId = req.user.id;
+    return this.comentariosService.create(dto, userId);
+  }
+
+  @Get(':recetaId')
+  async getByReceta(@Param('recetaId', ParseIntPipe) recetaId: number) {
+    return this.comentariosService.findByReceta(recetaId);
   }
 
   @Get()
-  async findAll(): Promise<ComentarioEntity[]> {
-    return await this.comentariosService.findAll();
-  }
-
-  @Get('recientes') 
-  async getRecientes(): Promise<ComentarioEntity[]> {
-    return await this.comentariosService.findRecientes();
-  }
-
-  @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateComentarioDto: UpdateComentarioDto,
-  ): Promise<ComentarioEntity> {
-    return await this.comentariosService.update(id, updateComentarioDto);
+  async findAll() {
+    return this.comentariosService.findAll();
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return await this.comentariosService.remove(id);
+  @UseGuards(JwtAuthGuard)
+  async delete(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    const { id: userId, rol } = req.user;
+    return this.comentariosService.delete(id, userId, rol);
   }
 }

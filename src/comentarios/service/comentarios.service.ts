@@ -1,90 +1,82 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ComentarioEntity } from 'src/models/comentario.entity';
 import { RecetaEntity } from 'src/models/receta.entity';
 import { UsuarioEntity } from 'src/models/usuario.entity';
-import { Repository } from 'typeorm';
-import { ComentarioEntity } from '../../models/comentario.entity';
 import { CreateComentarioDto } from '../dto/create-comentario.dto';
-import { UpdateComentarioDto } from '../dto/update-comentario.dto';
+import { RecetasService } from 'src/recetas/service/recetas.service';
 
 @Injectable()
 export class ComentariosService {
   constructor(
     @InjectRepository(ComentarioEntity)
-    private readonly comentarioRepository: Repository<ComentarioEntity>,
+    private readonly comentarioRepo: Repository<ComentarioEntity>,
 
     @InjectRepository(UsuarioEntity)
-    private readonly usuarioRepository: Repository<UsuarioEntity>,
+    private readonly usuarioRepo: Repository<UsuarioEntity>,
 
     @InjectRepository(RecetaEntity)
-    private readonly recetaRepository: Repository<RecetaEntity>,
+    private readonly recetaRepo: Repository<RecetaEntity>,
+
+    private readonly recetasService: RecetasService,
   ) {}
 
-  async create(createComentarioDto: CreateComentarioDto): Promise<ComentarioEntity> {
-    const usuario = await this.usuarioRepository.findOne({ where: { id: createComentarioDto.usuarioId } });
-    if (!usuario) {
-      throw new NotFoundException(`Usuario con ID ${createComentarioDto.usuarioId} no encontrado`);
-    }
+  async create(dto: CreateComentarioDto, userId: number): Promise<ComentarioEntity> {
+    const usuario = await this.usuarioRepo.findOne({ where: { id: userId } });
+    const receta = await this.recetaRepo.findOne({ where: { id: dto.recetaId } });
 
-    const receta = await this.recetaRepository.findOne({ where: { id: createComentarioDto.recetaId } });
-    if (!receta) {
-      throw new NotFoundException(`Receta con ID ${createComentarioDto.recetaId} no encontrada`);
-    }
+    if (!usuario) throw new NotFoundException('Usuario no encontrado');
+    if (!receta) throw new NotFoundException('Receta no encontrada');
 
-    const comentario = this.comentarioRepository.create({
-      contenido: createComentarioDto.contenido,
+    const comentario = this.comentarioRepo.create({
+      contenido: dto.contenido,
       usuario,
       receta,
     });
 
-    return await this.comentarioRepository.save(comentario);
+    return this.comentarioRepo.save(comentario);
+  }
+
+  async findByReceta(recetaId: number): Promise<ComentarioEntity[]> {
+    return this.comentarioRepo.find({
+      where: { receta: { id: recetaId } },
+      relations: ['usuario'],
+      order: { createdAt: 'DESC' },
+    });
   }
 
   async findAll(): Promise<ComentarioEntity[]> {
-    return await this.comentarioRepository.find({
+    return this.comentarioRepo.find({
       relations: ['usuario', 'receta'],
+      order: { createdAt: 'DESC' },
     });
   }
 
-  async update(id: number, updateComentarioDto: UpdateComentarioDto): Promise<ComentarioEntity> {
-    const comentario = await this.comentarioRepository.findOne({ where: { id } });
-    if (!comentario) {
-      throw new NotFoundException(`Comentario ${id} no encontrado`);
-    }
-
-    if (updateComentarioDto.usuarioId) {
-      const usuario = await this.usuarioRepository.findOne({ where: { id: updateComentarioDto.usuarioId } });
-      if (!usuario) throw new NotFoundException(`Usuario con ID ${updateComentarioDto.usuarioId} no encontrado`);
-      comentario.usuario = usuario;
-    }
-
-    if (updateComentarioDto.recetaId) {
-      const receta = await this.recetaRepository.findOne({ where: { id: updateComentarioDto.recetaId } });
-      if (!receta) throw new NotFoundException(`Receta con ID ${updateComentarioDto.recetaId} no encontrada`);
-      comentario.receta = receta;
-    }
-
-    if (updateComentarioDto.contenido) {
-      comentario.contenido = updateComentarioDto.contenido;
-    }
-
-    return await this.comentarioRepository.save(comentario);
-  }
-
-  async remove(id: number): Promise<void> {
-    const result = await this.comentarioRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Comentario ${id} no encontrado`);
-    }
-  }
-  async findRecientes(): Promise<ComentarioEntity[]> {
-    return await this.comentarioRepository.find({
+  async delete(id: number, userId: number, rol: string): Promise<void> {
+    const comentario = await this.comentarioRepo.findOne({
+      where: { id },
       relations: ['usuario', 'receta'],
-      order: { id: 'DESC' },
-      take: 5,
     });
+
+    if (!comentario) throw new NotFoundException('Comentario no encontrado');
+
+    const esAutor = comentario.usuario.id === userId;
+    const esAdmin = rol === 'admin';
+
+    if (!esAutor && !esAdmin) {
+      throw new ForbiddenException('No tienes permisos para eliminar este comentario');
+    }
+
+    await this.comentarioRepo.remove(comentario);
+
+    await this.recetasService.eliminarCalificacionUsuario(
+      comentario.receta.id,
+      comentario.usuario.id,
+    );
   }
-  
 }
-
-

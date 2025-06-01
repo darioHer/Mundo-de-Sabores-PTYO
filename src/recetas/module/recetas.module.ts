@@ -1,14 +1,14 @@
-import { forwardRef, Module } from '@nestjs/common';
+// recetas.module.ts
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CategoriasModule } from 'src/categorias/module/categorias.module';
-import { CategoriaEntity } from 'src/models/categoria.entity';
-import { ComentarioEntity } from 'src/models/comentario.entity';
 import { RecetaEntity } from 'src/models/receta.entity';
 import { UsuarioEntity } from 'src/models/usuario.entity';
-import { ProductosModule } from 'src/productos/module/productos.module';
-import { RecetasController } from '../controller/recetas.controller';
-import { RecetasService } from '../service/recetas.service';
+import { CategoriaEntity } from 'src/models/categoria.entity';
 import { RegionEntity } from 'src/models/region.entity';
+import { ProductosModule } from 'src/productos/module/productos.module';
+import { RecetasService } from '../service/recetas.service';
+import { RecetasController } from '../controller/recetas.controller';
+import { CalificacionEntity } from 'src/models/calificacion.entity';
 
 
 @Module({
@@ -16,11 +16,10 @@ import { RegionEntity } from 'src/models/region.entity';
     TypeOrmModule.forFeature([
       RecetaEntity,
       UsuarioEntity,
-      ComentarioEntity,
       CategoriaEntity,
       RegionEntity,
+      CalificacionEntity,
     ]),
-    CategoriasModule,
     forwardRef(() => ProductosModule),
   ],
   controllers: [RecetasController],

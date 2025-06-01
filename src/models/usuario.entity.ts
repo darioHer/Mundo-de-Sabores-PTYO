@@ -3,6 +3,7 @@ import { RolEntity } from 'src/models/rol.entity';
 import { RecetaEntity } from 'src/models/receta.entity';
 import { ProductoEntity } from 'src/models/producto.entity';
 import {  Column,  Entity,  JoinColumn,  ManyToOne,  OneToMany,  PrimaryGeneratedColumn,  CreateDateColumn,  UpdateDateColumn,} from 'typeorm';
+import { CalificacionEntity } from './calificacion.entity';
 
 @Entity('usuarios')
 export class UsuarioEntity {
@@ -51,4 +52,8 @@ export class UsuarioEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => CalificacionEntity, calificacion => calificacion.usuario)
+calificaciones: CalificacionEntity[];
+
 }

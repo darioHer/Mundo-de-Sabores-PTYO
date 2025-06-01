@@ -1,27 +1,30 @@
-import { IsOptional, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsOptional, IsString, IsInt } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class UpdateRecetaDto {
   @IsOptional()
-  @IsNotEmpty()
+  @IsString()
   title?: string;
 
   @IsOptional()
-  @IsNotEmpty()
+  @IsString()
   description?: string;
 
   @IsOptional()
-  @IsNotEmpty()
+  @IsString()
   ingredients?: string;
 
   @IsOptional()
-  @IsNotEmpty()
+  @IsString()
   instructions?: string;
 
   @IsOptional()
-  @IsNotEmpty()
+  @IsInt()
+  @Type(() => Number)
   regionId?: number;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
+  @Type(() => Number)
   categoriaId?: number;
 }
