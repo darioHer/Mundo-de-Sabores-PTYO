@@ -12,6 +12,7 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -30,7 +31,7 @@ import { RecetaEntity } from 'src/models/receta.entity';
 
 @Controller('recetas')
 export class RecetasController {
-  constructor(private readonly recetasService: RecetasService) {}
+  constructor(private readonly recetasService: RecetasService) { }
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -137,4 +138,10 @@ export class RecetasController {
   async obtenerTotalCalificadores(@Param('id', ParseIntPipe) id: number) {
     return this.recetasService.obtenerTotalCalificadores(id);
   }
+
+  @Get('cercanas')
+  findNearby(@Query('lat') lat: string, @Query('lng') lng: string) {
+    return this.recetasService.findNearby(+lat, +lng);
+  }
+
 }

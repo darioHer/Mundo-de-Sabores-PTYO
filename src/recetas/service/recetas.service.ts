@@ -274,5 +274,22 @@ export class RecetasService {
     await this.recetaRepository.save(receta);
   }
   
+  async findNearby(lat: number, lng: number): Promise<RecetaEntity[]> {
+    const distanciaMaximaKm = 10; // Radio configurable
+  
+    return this.recetaRepository
+      .createQueryBuilder('receta')
+      .where(`
+        6371 * acos(
+          cos(radians(:lat)) *
+          cos(radians(receta.latitud)) *
+          cos(radians(receta.longitud) - radians(:lng)) +
+          sin(radians(:lat)) *
+          sin(radians(receta.latitud))
+        ) < :distancia
+      `, { lat, lng, distancia: distanciaMaximaKm })
+      .getMany();
+  }
+  
     
 }

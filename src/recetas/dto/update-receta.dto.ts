@@ -27,4 +27,13 @@ export class UpdateRecetaDto {
   @IsInt()
   @Type(() => Number)
   categoriaId?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  latitud?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  longitud?: number;
+
 }

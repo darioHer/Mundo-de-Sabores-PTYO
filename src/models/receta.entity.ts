@@ -36,6 +36,12 @@ export class RecetaEntity {
   @Column({ nullable: true })
   imagenUrl?: string;
 
+  @Column({ type: 'float', nullable: true })
+  latitud: number;
+
+  @Column({ type: 'float', nullable: true })
+  longitud: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -50,6 +56,9 @@ export class RecetaEntity {
 
   @Column({ type: 'int', default: 0 })
   cantidadCalificaciones: number;
+
+
+
 
   @ManyToOne(() => UsuarioEntity, usuario => usuario.recetas, { eager: true })
   usuario: UsuarioEntity;

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsInt } from 'class-validator';
+import { IsNotEmpty, IsString, IsInt, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateRecetaDto {
@@ -27,4 +27,13 @@ export class CreateRecetaDto {
   @IsInt()
   @Type(() => Number)
   categoriaId: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  latitud?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  longitud?: number;
+
 }
