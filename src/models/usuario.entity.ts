@@ -2,8 +2,10 @@ import { ComentarioEntity } from 'src/models/comentario.entity';
 import { RolEntity } from 'src/models/rol.entity';
 import { RecetaEntity } from 'src/models/receta.entity';
 import { ProductoEntity } from 'src/models/producto.entity';
-import {  Column,  Entity,  JoinColumn,  ManyToOne,  OneToMany,  PrimaryGeneratedColumn,  CreateDateColumn,  UpdateDateColumn,} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, } from 'typeorm';
 import { CalificacionEntity } from './calificacion.entity';
+import { CartEntity } from './cart.entity';
+
 
 @Entity('usuarios')
 export class UsuarioEntity {
@@ -54,6 +56,11 @@ export class UsuarioEntity {
   updatedAt: Date;
 
   @OneToMany(() => CalificacionEntity, calificacion => calificacion.usuario)
-calificaciones: CalificacionEntity[];
+  calificaciones: CalificacionEntity[];
+
+  @OneToMany(() => CartEntity, (carrito) => carrito.usuario)
+  carritos: CartEntity[];
+  
+
 
 }
