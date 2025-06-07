@@ -22,4 +22,10 @@ export class UpdateProductoDto {
   @IsOptional()
   @IsBoolean()
   aprobado?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  stock?: number;
+
 }

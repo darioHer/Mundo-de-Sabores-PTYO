@@ -28,7 +28,7 @@ export class ProductosService {
     createProductoDto: CreateProductoDto,
     usuarioId: number,
   ): Promise<ProductoEntity> {
-    const { name, regionId, ...rest } = createProductoDto;
+    const { name, regionId, stock, ...rest } = createProductoDto;
 
     const existe = await this.productoRepository.findOne({ where: { name } });
     if (existe) {
@@ -47,6 +47,7 @@ export class ProductosService {
 
     const producto = this.productoRepository.create({
       name,
+      stock,
       ...rest,
       usuario,
       region,
@@ -117,6 +118,10 @@ export class ProductosService {
       }
 
       productoExistente.region = region;
+    }
+
+    if (updateProductoDto.stock !== undefined) {
+      productoExistente.stock = updateProductoDto.stock;
     }
 
     const actualizado = Object.assign(productoExistente, updateProductoDto);

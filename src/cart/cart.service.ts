@@ -17,7 +17,7 @@ export class CartService {
 
         @InjectRepository(ProductoEntity)
         private readonly productoRepo: Repository<ProductoEntity>
-    ) { }
+    ) {}
 
     /**
      * Busca o crea un carrito para el usuario.
@@ -68,10 +68,11 @@ export class CartService {
     }
 
     /**
-     * Obtiene el carrito actual del usuario con todos los ítems.
+     * Obtiene solo los ítems del carrito del usuario (formato esperado por el frontend).
      */
-    async getCart(userId: number): Promise<CartEntity> {
-        return await this.getOrCreateCart(userId);
+    async getCart(userId: number): Promise<{ items: CarritoItem[] }> {
+        const cart = await this.getOrCreateCart(userId);
+        return { items: cart.items };
     }
 
     /**

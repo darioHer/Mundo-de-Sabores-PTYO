@@ -13,5 +13,10 @@ export class CreateProductoDto {
 
   @IsNumber()
   @IsPositive()
-  regionId: number; // ID de la región seleccionada
+  regionId: number;
+
+  @IsNumber()
+  @IsPositive()
+  stock: number;
+
 }

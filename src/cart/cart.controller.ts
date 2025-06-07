@@ -15,7 +15,7 @@ import { CartService } from './cart.service';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { Request } from 'express';
 
-@UseGuards(AuthGuard('jwt')) // Asegura que se use el AuthGuard JWT
+@UseGuards(AuthGuard('jwt'))
 @Controller('cart')
 export class CartController {
     constructor(private readonly cartService: CartService) { }
@@ -29,7 +29,7 @@ export class CartController {
         if (!userId) {
             throw new Error('User ID is undefined');
         }
-        return await this.cartService.addItem(userId, dto);
+        return this.cartService.addItem(userId, dto);
     }
 
     /**
@@ -41,7 +41,7 @@ export class CartController {
         if (!userId) {
             throw new Error('User ID is undefined');
         }
-        return await this.cartService.getCart(userId);
+        return this.cartService.getCart(userId);
     }
 
     /**
@@ -61,7 +61,7 @@ export class CartController {
     }
 
     /**
-     * Elimina todos los ítems del carrito del usuario
+     * Vacía el carrito del usuario autenticado
      */
     @Delete()
     @HttpCode(204)

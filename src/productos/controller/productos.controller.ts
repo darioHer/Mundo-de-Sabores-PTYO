@@ -1,4 +1,16 @@
-import {  Body,Controller,Delete,Get,Param,ParseIntPipe,Patch,Post, Put,Req,UseGuards,} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AutorOrAdminGuard } from 'src/auth/guard/autor-or-admin.guard';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { CreateProductoDto } from '../dto/create-producto.dto';
@@ -61,7 +73,6 @@ export class ProductosController {
     return await this.productosService.aprobarProducto(id);
   }
 
-  // ✅ ESTA DEBE IR AL FINAL
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return await this.productosService.findOne(id);

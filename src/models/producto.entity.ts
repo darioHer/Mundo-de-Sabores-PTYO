@@ -19,6 +19,10 @@ export class ProductoEntity {
   @Column('decimal')
   price: number;
 
+  @Column({ type: 'int', default: 0 })
+  stock: number;
+
+
   @Column({ default: false })
   aprobado: boolean;
 
